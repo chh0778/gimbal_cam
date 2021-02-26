@@ -1,0 +1,49 @@
+//mpu센서값으로 서보 1개 조종하기
+//SDA->A4, SCL->A5, 서보 신호핀->9(PWM)
+#include "Wire.h"
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include "Servo.h"
+#include <stdlib.h>
+
+MPU6050 mpu;
+
+int16_t ax, ay, az;
+int16_t gx, gy, gz;
+
+
+Servo myservo;
+
+int val;
+int prevVal;
+
+void setup() {
+  Wire.begin();
+  Serial.begin(38400);
+
+  Serial.println("Initialize MPU");
+  mpu.initialize();
+  Serial.println(mpu.testConnection() ? "Connected" : "Connection failed");
+  myservo.attach(9);      //핀 번호 설정
+}
+
+void loop() {
+  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+  
+  val = map(ay, -17000, 17000, 0, 179); //mpu기준 긴쪽
+
+  Serial.print(val);
+  Serial.print(',');
+  Serial.print(prevVal);
+  Serial.print(',');
+  //갑자기 튀는 값을 무시하고 이전 값을 그대로 유지해보자
+  //이전값하고 5 이상 차이나면 그대로 가는거
+  
+  //이 순간 잘못된 값은 val값이다.
+  Serial.println(abs(val-prevVal));
+  if(val<prevVal-7 ||val>prevVal+7){      //조정값1: 노이즈 무시값
+    myservo.write(val);
+    prevVal = val;
+  }
+  delay(70);                              //조정값2: 딜레이값
+}
