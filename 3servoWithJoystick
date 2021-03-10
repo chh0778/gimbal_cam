@@ -1,0 +1,35 @@
+//조이스틱으로 서보모터 3개 제어하기
+#include<Servo.h>
+
+Servo servox;
+Servo servoy;
+Servo servoz;
+
+int pinx = A0;    //조이스틱 핀번호 지정
+int piny = A1;
+int pinz = A2;
+
+int valx;         //조이스틱 
+int valy;
+int valz;
+
+void setup(){
+  servox.attach(9);   //서보 핀 지정
+  servoy.attach(10);
+  servoz.attach(11);
+}
+
+void loop(){
+  valx = analogRead(pinx);
+  valy = analogRead(piny);
+  valz = analogRead(pinz);
+
+  valx = map(valx, 0, 1023, 0, 180);
+  valy = map(valy, 0, 1023, 0, 180);
+  valz = map(valz, 0, 1023, 0, 180);
+
+  servox.write(valx);
+  servoy.write(valy);
+  servoz.write(valz);
+  delay(100);
+}
